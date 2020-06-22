@@ -5,9 +5,13 @@
 package it.polito.tdp.food;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.food.model.Food;
 import it.polito.tdp.food.model.Model;
+import it.polito.tdp.food.model.Portion;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -41,7 +45,7 @@ public class FoodController {
     private Button btnSimula; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxFood"
-    private ComboBox<?> boxFood; // Value injected by FXMLLoader
+    private ComboBox<Food> boxFood; // Value injected by FXMLLoader
 
     @FXML // fx:id="txtResult"
     private TextArea txtResult; // Value injected by FXMLLoader
@@ -49,13 +53,35 @@ public class FoodController {
     @FXML
     void doCreaGrafo(ActionEvent event) {
     	txtResult.clear();
+    	String s = txtPorzioni.getText();
+    	try {
+    		List<Food> porzioni = new ArrayList<>(this.model.listPortionsPortate(Integer.parseInt(s)));
+    		if(porzioni.isEmpty()) {
+    			txtResult.setText("NON SONO STATE TROVATE PORZIONI CON QUESTO NUMERO, PROVA A INSERIRE UN NUMERO PIU' ALTO");
+    			return ;
+    		}
+    		boxFood.getItems().clear();
+        	boxFood.getItems().addAll(porzioni);
+    	} catch(NumberFormatException e) {
+    		txtResult.setText("INSERISCI UN VALORE NUMERICO IN NUMERO DI PORZIONI");
+    	}
+    	this.model.creaGrafo();
     	txtResult.appendText("Creazione grafo...");
     }
     
     @FXML
     void doCalorie(ActionEvent event) {
     	txtResult.clear();
-    	txtResult.appendText("Analisi calorie...");
+    	List<Food> vicini = new ArrayList<>();
+    	vicini.addAll(this.model.getVicini(boxFood.getValue()));
+    	if(vicini.isEmpty()) {
+    		txtResult.appendText("Non ci sono elementi che coincidono con quello selezionato.");
+    		return ;
+    	}
+    	for(Food f : vicini) {
+    		txtResult.appendText(f.toString()+"\n");
+    	}
+    	
     }
 
     @FXML
